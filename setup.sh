@@ -3,7 +3,7 @@ set -euo pipefail
 
 # =============================================================================
 # Tmux Config Setup Script
-# Installs all dependencies via cargo/go and configures TPM + sesh.
+# Installs all dependencies via cargo/go, initializes submodules, and configures sesh.
 # =============================================================================
 
 RED='\033[0;31m'
@@ -52,14 +52,11 @@ install_go() {
 
 install_go github.com/joshmedeski/sesh@latest sesh
 
-# --- Install TPM ---
-TPM_DIR="$HOME/.tmux/plugins/tpm"
-if [ -d "$TPM_DIR" ]; then
-    info "TPM already installed at $TPM_DIR"
-else
-    info "Installing TPM..."
-    git clone https://github.com/tmux-plugins/tpm "$TPM_DIR"
-fi
+# --- Initialize git submodules (plugins) ---
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+info "Initializing git submodules..."
+cd "$SCRIPT_DIR"
+git submodule update --init --recursive
 
 # --- Create sesh config if missing ---
 SESH_CONFIG="$HOME/.config/sesh/sesh.toml"
@@ -91,9 +88,8 @@ echo ""
 echo "  2. (Fish shell) Add zoxide init to ~/.config/fish/config.fish:"
 echo "     zoxide init fish | source"
 echo ""
-echo "  3. Start tmux and install plugins:"
+echo "  3. Start tmux:"
 echo "     tmux new -s main"
-echo "     Then press Ctrl-Space, Shift-I to install TPM plugins"
 echo ""
-echo "  4. Reload config:"
+echo "  4. Reload config if tmux is already running:"
 echo "     Press Ctrl-Space, r"

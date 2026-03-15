@@ -12,9 +12,13 @@ The prefix key is remapped from `Ctrl-b` to `Ctrl-Space`.
 
 Press `prefix + Space` to open a which-key style popup showing all available keybindings, organized by category. Powered by [tmux-which-key](https://github.com/alexwforsythe/tmux-which-key).
 
-### Session Switcher (`prefix + s`)
+### Active Session Switcher (`prefix + s`)
 
-A telescope-like fuzzy finder for tmux sessions. Uses [sesh](https://github.com/joshmedeski/sesh) + [fzf](https://github.com/junegunn/fzf) in a floating popup with preview.
+Shows only active tmux sessions with a live pane preview. Quick way to jump between running sessions.
+
+### Full Session Switcher (`prefix + S`)
+
+A telescope-like fuzzy finder across all session sources. Uses [sesh](https://github.com/joshmedeski/sesh) + [fzf](https://github.com/junegunn/fzf) in a floating popup with preview.
 
 **Controls inside the popup:**
 - Type to fuzzy search
@@ -94,20 +98,18 @@ cd ~/.config/tmux
 ./setup.sh
 ```
 
-Then start tmux, install TPM plugins, and reload:
+Then start tmux:
 
 ```bash
 tmux new -s main
-# Press Ctrl-Space, then Shift-I to install plugins
-# Press Ctrl-Space, then r to reload config
 ```
 
 ### Manual Setup
 
-1. **Clone this repo** to `~/.config/tmux/`:
+1. **Clone this repo** (with submodules) to `~/.config/tmux/`:
 
    ```bash
-   git clone <repo-url> ~/.config/tmux
+   git clone --recurse-submodules <repo-url> ~/.config/tmux
    ```
 
 2. **Install dependencies** (requires cargo and go):
@@ -117,13 +119,7 @@ tmux new -s main
    go install github.com/joshmedeski/sesh@latest
    ```
 
-3. **Install TPM** (Tmux Plugin Manager):
-
-   ```bash
-   git clone https://github.com/tmux-plugins/tpm ~/.tmux/plugins/tpm
-   ```
-
-4. **Create sesh config** at `~/.config/sesh/sesh.toml`:
+3. **Create sesh config** at `~/.config/sesh/sesh.toml`:
 
    ```toml
    [default_session]
@@ -135,15 +131,13 @@ tmux new -s main
    # path = "~/projects/myproject"
    ```
 
-5. **Start tmux** and install plugins:
+4. **Start tmux**:
 
    ```bash
    tmux new -s main
    ```
 
-   Inside tmux, press `Ctrl-Space` then `Shift-I` to install TPM plugins (including tmux-which-key).
-
-6. **Reload config**:
+5. **Reload config** (if tmux was already running):
 
    Press `Ctrl-Space` then `r` to reload.
 
@@ -151,19 +145,19 @@ tmux new -s main
 
 ```
 ~/.config/tmux/
-├── tmux.conf                  # Main tmux configuration
+├── tmux.conf                      # Main tmux configuration
+├── plugins/
+│   └── tmux-which-key/            # Which-key plugin (git submodule)
 ├── scripts/
-│   ├── session-switcher.sh    # sesh + fzf session picker
-│   ├── window-switcher.sh     # fzf window picker with preview
-│   └── project-switcher.sh    # zoxide + fzf project directory picker
+│   ├── active-session-switcher.sh # Active tmux sessions picker
+│   ├── session-switcher.sh        # sesh + fzf all-source session picker
+│   ├── window-switcher.sh         # fzf window picker with preview
+│   └── project-switcher.sh        # zoxide + fzf project directory picker
+├── setup.sh                       # Dependency installer
 └── README.md
 
 ~/.config/sesh/
-└── sesh.toml                  # sesh session configuration
-
-~/.tmux/plugins/
-└── tpm/                       # Tmux Plugin Manager
-    └── ...
+└── sesh.toml                      # sesh session configuration
 ```
 
 ## Troubleshooting
@@ -171,4 +165,4 @@ tmux new -s main
 - **Ctrl-Space not working:** Check that macOS input source shortcut is disabled (see above).
 - **`~/.tmux.conf` exists:** Remove or rename it — it takes priority over `~/.config/tmux/tmux.conf`.
 - **Tools not found in popups:** The scripts add `~/go/bin` and `~/.cargo/bin` to PATH. If your tools are installed elsewhere, edit the `export PATH=...` line at the top of each script in `scripts/`.
-- **Which-key not showing:** Run `prefix + I` inside tmux to install TPM plugins, then `prefix + r` to reload.
+- **Which-key not showing:** Ensure submodules are initialized: `git submodule update --init --recursive` in `~/.config/tmux/`, then `prefix + r` to reload.
