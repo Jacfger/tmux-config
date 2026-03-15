@@ -44,13 +44,22 @@ Fuzzy-finds project directories using [zoxide](https://github.com/ajeetdsouza/zo
 | `prefix + h/j/k/l` | Navigate panes (vim-style) |
 | `prefix + H/J/K/L` | Resize panes |
 
+## How tmux Finds This Config
+
+Tmux automatically looks for config files in this order:
+
+1. `~/.tmux.conf`
+2. `$XDG_CONFIG_HOME/tmux/tmux.conf` (defaults to `~/.config/tmux/tmux.conf`)
+
+This repo lives at `~/.config/tmux/`, so tmux picks it up automatically — no symlinks or sourcing needed. If you have a `~/.tmux.conf` file, it takes priority and this config will be ignored; remove or rename it.
+
 ## Prerequisites
 
-The following tools must be installed and available in your `PATH`:
+The following tools must be installed and available in your `PATH`. Requires [Rust/cargo](https://rustup.rs) and [Go](https://go.dev/dl) toolchains.
 
 | Tool | Purpose | Install |
 |---|---|---|
-| [fzf](https://github.com/junegunn/fzf) | Fuzzy finder | `cargo install fzf` or `go install github.com/junegunn/fzf@latest` |
+| [fzf](https://github.com/junegunn/fzf) | Fuzzy finder | `cargo install fzf` |
 | [sesh](https://github.com/joshmedeski/sesh) | Session manager | `go install github.com/joshmedeski/sesh@latest` |
 | [zoxide](https://github.com/ajeetdsouza/zoxide) | Directory frecency tracker | `cargo install zoxide` |
 | [fd](https://github.com/sharkdp/fd) | Fast file finder | `cargo install fd-find` |
@@ -76,19 +85,45 @@ This ensures zoxide tracks your directory visits, which powers the project switc
 
 ## Installation
 
-1. **Clone this repo** (or copy files) to `~/.config/tmux/`:
+### Quick Setup
+
+Run the setup script to install all dependencies and configure everything:
+
+```bash
+cd ~/.config/tmux
+./setup.sh
+```
+
+Then start tmux, install TPM plugins, and reload:
+
+```bash
+tmux new -s main
+# Press Ctrl-Space, then Shift-I to install plugins
+# Press Ctrl-Space, then r to reload config
+```
+
+### Manual Setup
+
+1. **Clone this repo** to `~/.config/tmux/`:
 
    ```bash
    git clone <repo-url> ~/.config/tmux
    ```
 
-2. **Install TPM** (Tmux Plugin Manager):
+2. **Install dependencies** (requires cargo and go):
+
+   ```bash
+   cargo install fzf zoxide fd-find bat
+   go install github.com/joshmedeski/sesh@latest
+   ```
+
+3. **Install TPM** (Tmux Plugin Manager):
 
    ```bash
    git clone https://github.com/tmux-plugins/tpm ~/.tmux/plugins/tpm
    ```
 
-3. **Create sesh config** at `~/.config/sesh/sesh.toml`:
+4. **Create sesh config** at `~/.config/sesh/sesh.toml`:
 
    ```toml
    [default_session]
@@ -100,7 +135,7 @@ This ensures zoxide tracks your directory visits, which powers the project switc
    # path = "~/projects/myproject"
    ```
 
-4. **Start tmux** and install plugins:
+5. **Start tmux** and install plugins:
 
    ```bash
    tmux new -s main
@@ -108,7 +143,7 @@ This ensures zoxide tracks your directory visits, which powers the project switc
 
    Inside tmux, press `Ctrl-Space` then `Shift-I` to install TPM plugins (including tmux-which-key).
 
-5. **Reload config**:
+6. **Reload config**:
 
    Press `Ctrl-Space` then `r` to reload.
 
@@ -127,6 +162,13 @@ This ensures zoxide tracks your directory visits, which powers the project switc
 └── sesh.toml                  # sesh session configuration
 
 ~/.tmux/plugins/
-└── tpm/                       # Tmux Plugin Manager (auto-installed)
+└── tpm/                       # Tmux Plugin Manager
     └── ...
 ```
+
+## Troubleshooting
+
+- **Ctrl-Space not working:** Check that macOS input source shortcut is disabled (see above).
+- **`~/.tmux.conf` exists:** Remove or rename it — it takes priority over `~/.config/tmux/tmux.conf`.
+- **Tools not found in popups:** The scripts add `~/go/bin` and `~/.cargo/bin` to PATH. If your tools are installed elsewhere, edit the `export PATH=...` line at the top of each script in `scripts/`.
+- **Which-key not showing:** Run `prefix + I` inside tmux to install TPM plugins, then `prefix + r` to reload.
