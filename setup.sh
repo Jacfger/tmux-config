@@ -29,11 +29,12 @@ install_cargo() {
         info "$bin already installed ($(command -v "$bin"))"
     else
         info "Installing $crate via cargo..."
-        cargo install "$crate"
+        cargo install "$crate" --locked
     fi
 }
 
-install_cargo fzf fzf
+# install fzf with binary probably
+#
 install_cargo zoxide zoxide
 install_cargo fd-find fd
 install_cargo bat bat
