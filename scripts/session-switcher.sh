@@ -4,6 +4,30 @@
 
 export PATH="$HOME/go/bin:$HOME/.cargo/bin:$PATH"
 
+set_ghostty_project_title() {
+  local target="$1"
+  local project title client_tty
+
+  project=$(basename "$target")
+  title="${project} [$(hostname -s)]"
+
+  client_tty=$(tmux display-message -p '#{client_tty}' 2>/dev/null)
+  if [ -n "$client_tty" ] && [ -c "$client_tty" ]; then
+    printf '\033]0;%s\007' "$title" > "$client_tty"
+  else
+    printf '\033]0;%s\007' "$title"
+  fi
+}
+
+project_name_from_connected_session() {
+  local root
+
+  root=$(sesh root 2>/dev/null)
+  if [ -n "$root" ]; then
+    basename "$root"
+  fi
+}
+
 selected="$(
   (sesh list --icons 2>/dev/null || sesh list) | \
   fzf \
@@ -21,4 +45,9 @@ selected="$(
     --preview 'sesh preview {} 2>/dev/null || ls -la {}'
 )"
 
-[ -n "$selected" ] && sesh connect "$selected"
+if [ -n "$selected" ]; then
+  if sesh connect "$selected"; then
+    project=$(project_name_from_connected_session)
+    [ -n "$project" ] && set_ghostty_project_title "$project"
+  fi
+fi
